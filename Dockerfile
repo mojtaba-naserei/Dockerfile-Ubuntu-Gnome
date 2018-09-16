@@ -8,7 +8,7 @@
 # (c) Pete Birley
 
 # Pull base image.
-FROM dockerfile/ubuntu
+FROM  ubuntu:16.04
 
 # Setup enviroment variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -33,35 +33,42 @@ cd /tmp ; dpkg -i /fuse.deb
 RUN dpkg-divert --local --rename --add /sbin/initctl && ln -sf /bin/true /sbin/initctl
 
 # Install GNOME and tightvnc server.
-RUN apt-get update && apt-get install -y xorg gnome-core gnome-session-fallback tightvncserver libreoffice
+RUN apt-get update && apt-get install -y xorg gnome-core gnome-session-flashback tightvncserver
 
 # Pull in the hack to fix keyboard shortcut bindings for GNOME 3 under VNC
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/gnome-keybindings.pl /usr/local/etc/gnome-keybindings.pl
+COPY gnome-keybindings.pl /usr/local/etc/gnome-keybindings.pl
 RUN chmod +x /usr/local/etc/gnome-keybindings.pl
 
 # Add the script to fix and customise GNOME for docker
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/gnome-docker-fix-and-customise.sh /usr/local/etc/gnome-docker-fix-and-customise.sh
+COPY gnome-docker-fix-and-customise.sh /usr/local/etc/gnome-docker-fix-and-customise.sh
 RUN chmod +x /usr/local/etc/gnome-docker-fix-and-customise.sh
+
+# Install protonmail related software
+RUN apt-get install wget nginx -y \
+  && wget https://protonmail.com/download/protonmail-bridge_1.0.6-2_amd64.deb \
+  && apt-get install -y ./protonmail-bridge_1.0.6-2_amd64.deb \
+  && rm -f ./protonmail-bridge_1.0.6-2_amd64.deb \
+  && apt-get clean && apt-get autoclean
 
 # Set up VNC
 RUN mkdir -p /root/.vnc
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/xstartup /root/.vnc/xstartup
+COPY xstartup /root/.vnc/xstartup
 RUN chmod 755 /root/.vnc/xstartup
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/spawn-desktop.sh /usr/local/etc/spawn-desktop.sh
+COPY spawn-desktop.sh /usr/local/etc/spawn-desktop.sh
 RUN chmod +x /usr/local/etc/spawn-desktop.sh
 RUN apt-get install -y expect
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/start-vnc-expect-script.sh /usr/local/etc/start-vnc-expect-script.sh
+COPY start-vnc-expect-script.sh /usr/local/etc/start-vnc-expect-script.sh
 RUN chmod +x /usr/local/etc/start-vnc-expect-script.sh
-ADD https://raw.githubusercontent.com/CannyComputing/Dockerfile-Ubuntu-Gnome/master/vnc.conf /etc/vnc.conf
+COPY vnc.conf /etc/vnc.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+
+RUN echo 'eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)' > ~/.xinitrc && echo 'export SSH_AUTH_SOCK' >> ~/.xinitrc
 
 # Define mountable directories.
-VOLUME ["/data"]
-
-# Define working directory.
-WORKDIR /data
+VOLUME ["/root/.local"]
 
 # Define default command.
 CMD bash -C '/usr/local/etc/spawn-desktop.sh';'bash'
 
 # Expose ports.
-EXPOSE 5901
+EXPOSE 5901 1144 1026

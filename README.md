@@ -17,22 +17,22 @@ This repository contains the *Dockerfile* and *associated files* for setting up 
 	For an Ubuntu 14.04 host the following commands will get you up and running:
 
 	`sudo apt-get -y update && \
-	
+
 	sudo apt-get -y install docker.io && \
-	
+
 	sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker && \
-	
+
 	sudo restart docker.io`
 
 
 2. You can then pull the file:
 
-	`sudo docker pull cannycomputing/dockerfile-ubuntu-gnome`
+	`sudo docker pull blacs30/dockerfile-ubuntu-gnome`
 
 
 	Or alternatively build an image from the Dockerfile:
 
-	`sudo docker build -t="cannycomputing/dockerfile-ubuntu-gnome" github.com/CannyComputing/Dockerfile-Ubuntu-Gnome`
+	`sudo docker build -t="blacs30/dockerfile-ubuntu-gnome" github.com/blacs30/Dockerfile-Ubuntu-Gnome`
 
 
 ### SuperQuick Install
@@ -44,8 +44,8 @@ This repository contains the *Dockerfile* and *associated files* for setting up 
 	sudo apt-get -y install docker.io && \
 	sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker && \
 	sudo restart docker.io && \
-	sudo docker pull cannycomputing/dockerfile-ubuntu-gnome && \
-	sudo docker run -it --rm -p 5901:5901 cannycomputing/dockerfile-ubuntu-gnome
+	sudo docker pull blacs30/dockerfile-ubuntu-gnome && \
+	sudo docker run -it --rm -p 5901:5901 blacs30/dockerfile-ubuntu-gnome
 
 
 ### Usage
@@ -56,11 +56,11 @@ This repository contains the *Dockerfile* and *associated files* for setting up 
 
 * this will run and drop you into a session:
 
-	`sudo docker run -it --rm -p 5901:5901 cannycomputing/dockerfile-ubuntu-gnome`
+	`sudo docker run -it --rm -p 5901:5901 blacs30/dockerfile-ubuntu-gnome`
 
 * or for silent running:
 
-	`sudo docker run -it -d -p 5901:5901 cannycomputing/dockerfile-ubuntu-gnome`
+	`sudo docker run -it -d -p 5901:5901 blacs30/dockerfile-ubuntu-gnome`
 
 #### Connecting to instance
 
@@ -76,3 +76,29 @@ This repository contains the *Dockerfile* and *associated files* for setting up 
 
 	`USER=root vncserver :1 -geometry 1024x768 -depth 24`
 
+#### Protonmail usage
+
+It is possible to run the Protonmail Bridge Inside this container. The Bridge comes pre-installed.
+How to add new Protonmail accounts to the bridge:
+
+* Establish a VNC session
+* Open a terminal window in the VNC session
+* Run `Desktop-Bridge --cli` (the GUI had issues recognizing my keyboards corretly via the VNC session from a Mac)
+* Add the account(s)
+
+The first time an account is added the gnome-keyring is asking for master password. This password has to be entered after every reboot.
+
+Exit the cli again and start the gui, e.g. via the Menu bar or again via the terminal `Desktop-Bridge &`
+
+See the configuration and use an Email client of your choice to connect.
+
+As the Protonmail bridge only listens on the loopback interface (127.0.0.1) nginx streams the tcp connection to 0.0.0.0:1144 (imap) and 0.0.0.0:1026(smtp). The ports are incremented by one so that there is no duplicated port inside the container.
+
+The configuration for Protonmail is stored basically in the gnome-keyring. That can be bind-mounted to save the data e.g. outside of docker or in a docker-volume.
+
+This is an example and functioning `docker run` command:
+```
+docker run -it -v $(pwd)/protonmail:/root/.local -d --cap-add ipc_lock -p 5901:5901 -p 1026:1026 -p 1144:1144 blacs30/dockerfile-ubuntu-gnome
+```
+
+The parameter `--cap-add ipc_lock` is important as otherwise the gnome-keyring cannot function. Alternatively --privileged could be also used.
