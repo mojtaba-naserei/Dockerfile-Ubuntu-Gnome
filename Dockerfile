@@ -8,7 +8,7 @@
 # (c) Pete Birley
 
 # Pull base image.
-FROM  ubuntu:16.04
+FROM  ubuntu:18.04
 
 # Setup enviroment variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -43,12 +43,6 @@ RUN chmod +x /usr/local/etc/gnome-keybindings.pl
 COPY gnome-docker-fix-and-customise.sh /usr/local/etc/gnome-docker-fix-and-customise.sh
 RUN chmod +x /usr/local/etc/gnome-docker-fix-and-customise.sh
 
-# Install protonmail related software
-RUN apt-get install wget nginx -y \
-  && wget https://protonmail.com/download/protonmail-bridge_1.0.6-2_amd64.deb \
-  && apt-get install -y ./protonmail-bridge_1.0.6-2_amd64.deb \
-  && rm -f ./protonmail-bridge_1.0.6-2_amd64.deb \
-  && apt-get clean && apt-get autoclean
 
 # Set up VNC
 RUN mkdir -p /root/.vnc
@@ -60,12 +54,8 @@ RUN apt-get install -y expect
 COPY start-vnc-expect-script.sh /usr/local/etc/start-vnc-expect-script.sh
 RUN chmod +x /usr/local/etc/start-vnc-expect-script.sh
 COPY vnc.conf /etc/vnc.conf
-COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN echo 'eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)' > ~/.xinitrc && echo 'export SSH_AUTH_SOCK' >> ~/.xinitrc
-
-# Define mountable directories.
-VOLUME ["/root/.local"]
 
 # Define default command.
 CMD bash -C '/usr/local/etc/spawn-desktop.sh';'bash'
