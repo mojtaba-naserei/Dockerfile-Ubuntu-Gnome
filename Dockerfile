@@ -58,7 +58,8 @@ COPY vnc.conf /etc/vnc.conf
 RUN echo 'eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)' > ~/.xinitrc && echo 'export SSH_AUTH_SOCK' >> ~/.xinitrc
 
 # Define default command.
-CMD bash -C '/usr/local/etc/spawn-desktop.sh';'bash'
+CMD sh -c '/usr/local/etc/spawn-desktop.sh && sleep 2592000'
 
 # Expose ports.
 EXPOSE 5901 1144 1026
+

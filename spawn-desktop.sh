@@ -1,8 +1,8 @@
 #!/bin/sh
 # (c) Pete Birley
 
-if [[ -f /tmp/.X1-lock ]]; then rm -rf /tmp/.X1-lock; fi
-if [[ -d /tmp/.X11-unix ]]; then rm -rf /tmp/.X11-unix; fi
+if [ -f /tmp/.X1-lock ]; then rm -rf /tmp/.X1-lock; fi
+if [ -d /tmp/.X11-unix ]; then rm -rf /tmp/.X11-unix; fi
 
 #this sets the vnc password
 /usr/local/etc/start-vnc-expect-script.sh
