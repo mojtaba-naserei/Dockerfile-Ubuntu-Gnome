@@ -64,7 +64,7 @@ This repository contains the *Dockerfile* and *associated files* for setting up 
 
 #### Connecting to instance
 
-* Connect to `vnc://<host>:5901` via your VNC client. currently the password is hardcoded to "acoman"
+* Connect to `vnc://<host>:5901` via your VNC client. currently the password is hardcoded to "Your_PASS"
 
 #### Notes
 
@@ -91,8 +91,6 @@ The first time an account is added the gnome-keyring is asking for master passwo
 Exit the cli again and start the gui, e.g. via the Menu bar or again via the terminal `Desktop-Bridge &`
 
 See the configuration and use an Email client of your choice to connect.
-
-As the Protonmail bridge only listens on the loopback interface (127.0.0.1) nginx streams the tcp connection to 0.0.0.0:1144 (imap) and 0.0.0.0:1026(smtp). The ports are incremented by one so that there is no duplicated port inside the container.
 
 The configuration for Protonmail is stored basically in the gnome-keyring. That can be bind-mounted to save the data e.g. outside of docker or in a docker-volume.
 
